@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/JohnCrickett/GoRayTracingInAWeekend/tracer"
+)
 import "os"
 
 const (
@@ -21,15 +24,9 @@ func main() {
 	for row := 0; row < height; row++ {
 		fmt.Printf("\rScanlines remaining: %d", (height - row))
 		for col := 0; col < width; col++ {
-			red := float64(col) / (width - 1)
-			green := float64(row) / (height - 1)
-			blue := 0.0
 
-			r := int(255.999 * red)
-			g := int(255.999 * green)
-			b := int(255.999 * blue)
-
-			fmt.Fprintf(f, "%d %d %d\n", r, g, b)
+			p := tracer.Colour{float64(col) / (width - 1), float64(row) / (height - 1), 0.0}
+			p.Write(f)
 		}
 	}
 	fmt.Println("\rDone.                           ")
