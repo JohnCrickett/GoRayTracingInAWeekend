@@ -34,3 +34,11 @@ func (c Colour) Bbyte() uint8 {
 func (c Colour) Write(f io.Writer) {
 	fmt.Fprintf(f, "%d %d %d\n", c.Rbyte(), c.Gbyte(), c.Bbyte())
 }
+
+func (c Colour) Scale(n float64) Colour {
+	return Colour{c[0] * n, c[1] * n, c[2] * n}
+}
+
+func (c Colour) Plus(oc Colour) Colour {
+	return Colour{c[0] + oc[0], c[1] + oc[1], c[2] + oc[2]}
+}
