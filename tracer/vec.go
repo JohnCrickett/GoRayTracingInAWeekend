@@ -38,6 +38,10 @@ func (v Vec) Scale(n float64) Vec {
 	return Vec{v[0] * n, v[1] * n, v[2] * n}
 }
 
+func (v Vec) Divide(n float64) Vec {
+	return Vec{v[0] / n, v[1] / n, v[2] / n}
+}
+
 func (v Vec) LengthSquared() float64 {
 	return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]
 }

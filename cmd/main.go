@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/JohnCrickett/GoRayTracingInAWeekend/tracer"
+	"math"
 )
 import "os"
 
@@ -10,18 +11,13 @@ const (
 	targetFile = "test.ppm"
 )
 
-func hitSphere(center tracer.Point, radius float64, r *tracer.Ray) bool {
-	oc := center.Minus(r.Origin())
-	a := tracer.Dot(r.Direction(), r.Direction())
-	b := -2.0 * tracer.Dot(r.Direction(), oc)
-	c := tracer.Dot(oc, oc) - radius*radius
-	discriminant := b*b - 4*a*c
-	return discriminant >= 0
-}
+func rayColor(r *tracer.Ray, world tracer.Hittable) tracer.Colour {
+	var hitRecord *tracer.HitRecord
 
-func rayColor(r *tracer.Ray) tracer.Colour {
-	if hitSphere(tracer.Point{0, 0, -1}, 0.5, r) {
-		return tracer.Colour{1, 0, 0}
+	hit, hitRecord := world.Hit(r, 0, math.Inf(1))
+	if hit {
+		c := hitRecord.Normal.Plus(tracer.Vec{1.0, 1.0, 1.0}).Scale(0.5)
+		return tracer.Colour{c.X(), c.Y(), c.Z()}
 	}
 
 	unitDirection := tracer.UnitVector(r.Direction())
@@ -40,6 +36,11 @@ func main() {
 		imageHeight = 1
 	}
 
+	// World
+	var world tracer.HittableList
+	world.Add(tracer.NewSphere(tracer.Vec{0, 0, -1}, 0.5))
+	world.Add(tracer.NewSphere(tracer.Vec{0, -100.5, -1}, 100))
+
 	// Camera
 	focalLength := 1.0
 	viewportHeight := 2.0
@@ -51,8 +52,8 @@ func main() {
 	viewportV := tracer.Vec{0, -viewportHeight, 0}
 
 	// Calculate the horizontal and vertical delta vectors from pixel to pixel.
-	pixelDeltaU := viewportU.Scale(1.0 / float64(imageWidth))
-	pixelDeltaV := viewportV.Scale(1.0 / float64(imageHeight))
+	pixelDeltaU := viewportU.Divide(float64(imageWidth))
+	pixelDeltaV := viewportV.Divide(float64(imageHeight))
 
 	// Calculate the location of the upper left pixel.
 	viewportUpperLeft := cameraCenter.Minus(tracer.Vec{0, 0, focalLength}).Minus(viewportU.Scale(0.5)).Minus(viewportV.Scale(0.5))
@@ -71,11 +72,11 @@ func main() {
 	for row := 0; row < imageHeight; row++ {
 		fmt.Printf("\rScanlines remaining: %d", (imageHeight - row))
 		for col := 0; col < imageWidth; col++ {
-			pixelCenter := pixel00Loc.Plus((pixelDeltaU.Scale(float64(col)))).Plus(pixelDeltaV.Scale(float64(row)))
+			pixelCenter := pixel00Loc.Plus(pixelDeltaU.Scale(float64(col))).Plus(pixelDeltaV.Scale(float64(row)))
 			rayDirection := pixelCenter.Minus(cameraCenter)
 			r := tracer.NewRay(cameraCenter, rayDirection)
 
-			pixel_color := rayColor(r)
+			pixel_color := rayColor(r, world)
 			pixel_color.Write(f)
 		}
 	}
