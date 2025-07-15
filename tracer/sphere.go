@@ -16,7 +16,7 @@ func NewSphere(center Point, radius float64) *Sphere {
 	}
 }
 
-func (s Sphere) Hit(ray *Ray, tmin float64, tmax float64) (bool, *HitRecord) {
+func (s Sphere) Hit(ray *Ray, rayT Interval) (bool, *HitRecord) {
 	oc := s.Center.Minus(ray.Origin())
 	a := ray.Direction().LengthSquared()
 	h := Dot(ray.Direction(), oc)
@@ -32,9 +32,11 @@ func (s Sphere) Hit(ray *Ray, tmin float64, tmax float64) (bool, *HitRecord) {
 
 	// Find the nearest root that lies in the acceptable range.
 	root := (h - sqrtd) / a
-	if root <= tmin || tmax <= root {
+	//if root <= rayT.Min || rayT.Max <= root {
+	if !rayT.Surrounds(root) {
 		root = (h + sqrtd) / a
-		if root <= tmin || tmax <= root {
+		if !rayT.Surrounds(root) {
+
 			return false, nil
 		}
 	}

@@ -14,7 +14,7 @@ const (
 func rayColor(r *tracer.Ray, world tracer.Hittable) tracer.Colour {
 	var hitRecord *tracer.HitRecord
 
-	hit, hitRecord := world.Hit(r, 0, math.Inf(1))
+	hit, hitRecord := world.Hit(r, tracer.NewInterval(0, math.Inf(1)))
 	if hit {
 		c := hitRecord.Normal.Plus(tracer.Vec{1.0, 1.0, 1.0}).Scale(0.5)
 		return tracer.Colour{c.X(), c.Y(), c.Z()}
