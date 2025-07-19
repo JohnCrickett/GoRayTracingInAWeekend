@@ -15,6 +15,6 @@ func main() {
 	world.Add(tracer.NewSphere(tracer.Vec{0, -100.5, -1}, 100))
 
 	// Camera
-	c := tracer.NewCamera(400, 16.0/9.0)
+	c := tracer.NewCamera(400, 16.0/9.0, 100)
 	c.Render(world, targetFile)
 }

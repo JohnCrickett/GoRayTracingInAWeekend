@@ -19,6 +19,16 @@ func (i Interval) Surrounds(v float64) bool {
 	return v > i.Min && v < i.Max
 }
 
+func (i Interval) Clamp(v float64) float64 {
+	if v < i.Min {
+		return i.Min
+	}
+	if v > i.Max {
+		return i.Max
+	}
+	return v
+}
+
 func NewInterval(min, max float64) Interval {
 	return Interval{
 		Min: min,
