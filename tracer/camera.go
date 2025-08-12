@@ -16,9 +16,10 @@ type Camera struct {
 	pixelDeltaV       Vec
 	samplesPerPixel   int
 	pixelSamplesScale float64
+	maxDepth          int
 }
 
-func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int) *Camera {
+func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int, maxDepth int) *Camera {
 	// Calculate the image height, and ensure that it's at least 1.
 	imageHeight := int(float64(imageWidth) / aspectRatio)
 	if imageHeight < 1 {
@@ -52,6 +53,7 @@ func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int) *Camera
 		pixelDeltaU:       pixelDeltaU,
 		samplesPerPixel:   samplesPerPixel,
 		pixelSamplesScale: 1.0 / float64(samplesPerPixel),
+		maxDepth:          maxDepth,
 	}
 }
 
@@ -67,12 +69,12 @@ func (c *Camera) Render(world HittableList, targetFile string) {
 	fmt.Fprintf(f, "P3\n%d %d 255\n", c.imageWidth, c.imageHeight)
 
 	for row := 0; row < c.imageHeight; row++ {
-		fmt.Printf("\rScanlines remaining: %d", (c.imageHeight - row))
+		fmt.Printf("\rScanlines remaining: %4d", c.imageHeight-row)
 		for col := 0; col < c.imageWidth; col++ {
 			pixelColour := Colour{0, 0, 0}
 			for sample := 0; sample < c.samplesPerPixel; sample++ {
 				r := c.getRay(col, row)
-				pixelColour = pixelColour.Add(c.rayColor(&r, world))
+				pixelColour = pixelColour.Add(c.rayColor(&r, c.maxDepth, world))
 			}
 			pixelColour = pixelColour.Scale(c.pixelSamplesScale)
 			pixelColour.Write(f)
@@ -81,13 +83,19 @@ func (c *Camera) Render(world HittableList, targetFile string) {
 	fmt.Println("\rDone.                           ")
 }
 
-func (c *Camera) rayColor(r *Ray, world Hittable) Colour {
+func (c *Camera) rayColor(r *Ray, depth int, world Hittable) Colour {
+	if depth < 0 {
+		return Colour{0, 0, 0}
+	}
 	var hitRecord *HitRecord
 
-	hit, hitRecord := world.Hit(r, NewInterval(0, math.Inf(1)))
+	hit, hitRecord := world.Hit(r, NewInterval(0.001, math.Inf(1)))
 	if hit {
-		c := hitRecord.Normal.Plus(Vec{1.0, 1.0, 1.0}).Scale(0.5)
-		return Colour{c.X(), c.Y(), c.Z()}
+		//direction := RandomOnHemisphere(hitRecord.Normal)
+		direction := hitRecord.Normal.Plus(RandomUnitVector())
+		return c.rayColor(&Ray{hitRecord.P, direction}, depth-1, world).Scale(0.5)
+		//c := hitRecord.Normal.Plus(Vec{1.0, 1.0, 1.0}).Scale(0.5)
+		//return Colour{c.X(), c.Y(), c.Z()}
 	}
 
 	unitDirection := UnitVector(r.Direction())

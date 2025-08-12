@@ -3,6 +3,7 @@ package tracer
 import (
 	"fmt"
 	"io"
+	"math"
 )
 
 var intensity = NewInterval(0.000, 0.999)
@@ -32,9 +33,29 @@ func (c Colour) B() float64 {
 func (c Colour) Bbyte() uint8 {
 	return uint8(256 * intensity.Clamp(c.B()))
 }
+func linearToGamma(linearComponent float64) float64 {
+	if linearComponent > 0 {
+		return math.Sqrt(linearComponent)
+	}
+
+	return 0
+}
 
 func (c Colour) Write(f io.Writer) {
-	fmt.Fprintf(f, "%d %d %d\n", c.Rbyte(), c.Gbyte(), c.Bbyte())
+	r := c.R()
+	g := c.G()
+	b := c.B()
+
+	// Apply a linear to gamma transform for gamma 2
+	r = linearToGamma(r)
+	g = linearToGamma(g)
+	b = linearToGamma(b)
+
+	rByte := uint8(256 * intensity.Clamp(r))
+	gByte := uint8(256 * intensity.Clamp(g))
+	bByte := uint8(256 * intensity.Clamp(b))
+
+	fmt.Fprintf(f, "%d %d %d\n", rByte, gByte, bByte)
 }
 
 func (c Colour) Scale(n float64) Colour {

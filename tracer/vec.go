@@ -69,3 +69,30 @@ func Cross(v, ov Vec) Vec {
 func UnitVector(v Vec) Vec {
 	return v.Scale(1 / v.Length())
 }
+
+func RandomVector() Vec {
+	return Vec{RandomDouble(), RandomDouble(), RandomDouble()}
+}
+
+func RandomVectorInRange(min, max float64) Vec {
+	return Vec{RandomDoubleInRange(min, max), RandomDoubleInRange(min, max), RandomDoubleInRange(min, max)}
+}
+
+func RandomUnitVector() Vec {
+	for {
+		p := RandomVectorInRange(-1, 1)
+		lensq := p.LengthSquared()
+		if 1e-160 < lensq && lensq <= 1 {
+			return p.Divide(math.Sqrt(lensq))
+		}
+	}
+}
+
+func RandomOnHemisphere(normal Vec) Vec {
+	onUnitSphere := RandomUnitVector()
+	if Dot(onUnitSphere, normal) > 0.0 { // In the same hemisphere as the normal
+		return onUnitSphere
+	} else {
+		return onUnitSphere.Scale(-1.0)
+	}
+}
