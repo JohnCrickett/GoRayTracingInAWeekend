@@ -23,11 +23,17 @@ func (l Lambertian) scatter(r *Ray, h *HitRecord) (bool, *Ray, Colour) {
 
 type Metal struct {
 	Albedo Colour
+	Fuzz   float64
 }
 
 func (l Metal) scatter(r *Ray, h *HitRecord) (bool, *Ray, Colour) {
 	reflected := reflect(r.Direction(), h.Normal)
+	reflected = UnitVector(reflected).Plus(RandomUnitVector().Scale(l.Fuzz))
 	scattered := NewRay(h.P, reflected)
 	at := l.Albedo
-	return true, scattered, at
+	var res bool
+	if Dot(scattered.Direction(), h.Normal) > 0 {
+		res = true
+	}
+	return res, scattered, at
 }
