@@ -3,6 +3,7 @@ package tracer
 type HitRecord struct {
 	P         Point
 	Normal    Vec
+	Material  Material
 	T         float64
 	FrontFace bool
 }

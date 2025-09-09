@@ -4,15 +4,17 @@ import "math"
 
 type Sphere struct {
 	Hittable
-	Center Point
-	Radius float64
+	Center   Point
+	Material Material
+	Radius   float64
 }
 
-func NewSphere(center Point, radius float64) *Sphere {
+func NewSphere(center Point, radius float64, material Material) *Sphere {
 	radius = math.Max(0, radius)
 	return &Sphere{
-		Center: center,
-		Radius: radius,
+		Center:   center,
+		Material: material,
+		Radius:   radius,
 	}
 }
 
@@ -44,6 +46,7 @@ func (s Sphere) Hit(ray *Ray, rayT Interval) (bool, *HitRecord) {
 	var rec HitRecord
 	rec.T = root
 	rec.P = ray.At(rec.T)
+	rec.Material = s.Material
 	outwardNormal := rec.P.Minus(s.Center).Divide(s.Radius)
 	rec.SetFaceNormal(ray, outwardNormal)
 

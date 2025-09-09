@@ -96,3 +96,13 @@ func RandomOnHemisphere(normal Vec) Vec {
 		return onUnitSphere.Scale(-1.0)
 	}
 }
+
+func (v *Vec) NearZero() bool {
+	// Return true if the vector is close to zero in all dimensions.
+	s := 1e-8
+	return (math.Abs(v[0]) < s) && (math.Abs(v[1]) < s) && (math.Abs(v[2]) < s)
+}
+
+func reflect(v, n Vec) Vec {
+	return v.Minus(n.Scale(2 * Dot(v, n)))
+}

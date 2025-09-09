@@ -66,6 +66,10 @@ func (c Colour) Plus(oc Colour) Colour {
 	return Colour{c[0] + oc[0], c[1] + oc[1], c[2] + oc[2]}
 }
 
+func (c Colour) Multiply(oc Colour) Colour {
+	return Colour{c[0] * oc[0], c[1] * oc[1], c[2] * oc[2]}
+}
+
 func (c Colour) Add(colour Colour) Colour {
 	return Colour{c.R() + colour.R(), c.G() + colour.G(), c.B() + colour.B()}
 }
