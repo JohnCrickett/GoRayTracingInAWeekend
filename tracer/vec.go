@@ -106,3 +106,10 @@ func (v *Vec) NearZero() bool {
 func reflect(v, n Vec) Vec {
 	return v.Minus(n.Scale(2 * Dot(v, n)))
 }
+
+func refract(uv, n Vec, etaiOverEtat float64) Vec {
+	cosTheta := math.Min(Dot(uv.Scale(-1.0), n), 1.0)
+	rOutPerp := uv.Plus(n.Scale(cosTheta)).Scale(etaiOverEtat)
+	rOutParallel := n.Scale(-math.Sqrt(math.Abs(1.0 - rOutPerp.LengthSquared())))
+	return rOutPerp.Plus(rOutParallel)
+}
