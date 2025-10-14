@@ -24,7 +24,16 @@ func main() {
 	world.Add(tracer.NewSphere(tracer.Vec{-1.0, 0.0, -1.0}, 0.4, materialBubble))
 	world.Add(tracer.NewSphere(tracer.Vec{1.0, 0.0, -1.0}, 0.5, materialRight))
 
+	//R := math.Cos(math.Pi / 4)
+	//
+	//materialLeft := tracer.Lambertian{tracer.Colour{0, 0, 1}}
+	//materialRight := tracer.Lambertian{tracer.Colour{1, 0, 0}}
+	//
+	//var world tracer.HittableList
+	//world.Add(tracer.NewSphere(tracer.Vec{-R, 0, -1}, R, materialLeft))
+	//world.Add(tracer.NewSphere(tracer.Vec{R, 0, -1}, R, materialRight))
+
 	// Camera
-	c := tracer.NewCamera(400, 16.0/9.0, 100, 50)
+	c := tracer.NewCamera(400, 16.0/9.0, 100, 50, 90.0, tracer.Vec{-2, 2, 1}, tracer.Vec{0, 0, -1}, tracer.Vec{0, 1, 0})
 	c.Render(world, targetFile)
 }

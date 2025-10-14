@@ -17,31 +17,43 @@ type Camera struct {
 	samplesPerPixel   int
 	pixelSamplesScale float64
 	maxDepth          int
+	vFoV              float64
+	LookFrom          Vec
+	LookAt            Vec
+	VUp               Vec
 }
 
-func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int, maxDepth int) *Camera {
+func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int, maxDepth int, vFoV float64, LookFrom, LookAt, VUp Vec) *Camera {
 	// Calculate the image height, and ensure that it's at least 1.
 	imageHeight := int(float64(imageWidth) / aspectRatio)
 	if imageHeight < 1 {
 		imageHeight = 1
 	}
+	
+	cameraCenter := LookFrom
 
 	// Camera
-	focalLength := 1.0
-	viewportHeight := 2.0
+	focalLength := LookFrom.Minus(LookAt).Length()
+	theta := DegreesToRadians(vFoV)
+	h := math.Tan(theta / 2)
+	viewportHeight := 2 * h * focalLength
 	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
-	cameraCenter := Point{0, 0, 0}
+
+	// Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+	w := UnitVector(LookFrom.Minus(LookAt))
+	u := UnitVector(Cross(VUp, w))
+	v := Cross(w, u)
 
 	// Calculate the vectors across the horizontal and down the vertical viewport edges.
-	viewportU := Vec{viewportWidth, 0, 0}
-	viewportV := Vec{0, -viewportHeight, 0}
+	viewportU := u.Scale(viewportWidth)
+	viewportV := v.Scale(-viewportHeight)
 
 	// Calculate the horizontal and vertical delta vectors from pixel to pixel.
 	pixelDeltaU := viewportU.Divide(float64(imageWidth))
 	pixelDeltaV := viewportV.Divide(float64(imageHeight))
 
 	// Calculate the location of the upper left pixel.
-	viewportUpperLeft := cameraCenter.Minus(Vec{0, 0, focalLength}).Minus(viewportU.Scale(0.5)).Minus(viewportV.Scale(0.5))
+	viewportUpperLeft := cameraCenter.Minus(w.Scale(focalLength)).Minus(viewportU.Scale(0.5)).Minus(viewportV.Scale(0.5))
 	pixel100Loc := viewportUpperLeft.Plus((pixelDeltaU.Plus(pixelDeltaV)).Scale(0.5))
 
 	return &Camera{
@@ -54,6 +66,10 @@ func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int, maxDept
 		samplesPerPixel:   samplesPerPixel,
 		pixelSamplesScale: 1.0 / float64(samplesPerPixel),
 		maxDepth:          maxDepth,
+		vFoV:              vFoV,
+		LookFrom:          LookFrom,
+		LookAt:            LookAt,
+		VUp:               VUp,
 	}
 }
 
