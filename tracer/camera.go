@@ -29,7 +29,7 @@ func NewCamera(imageWidth int, aspectRatio float64, samplesPerPixel int, maxDept
 	if imageHeight < 1 {
 		imageHeight = 1
 	}
-	
+
 	cameraCenter := LookFrom
 
 	// Camera
@@ -107,8 +107,6 @@ func (c *Camera) rayColor(r *Ray, depth int, world Hittable) Colour {
 
 	hit, hitRecord := world.Hit(r, NewInterval(0.001, math.Inf(1)))
 	if hit {
-		//	direction := hitRecord.Normal.Plus(RandomUnitVector())
-		//	return c.rayColor(&Ray{hitRecord.P, direction}, depth-1, world).Scale(0.5)
 		scatters, scatteredRay, atColour := hitRecord.Material.scatter(r, hitRecord)
 		if scatters {
 			return atColour.Multiply(c.rayColor(scatteredRay, depth-1, world))

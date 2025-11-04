@@ -25,7 +25,6 @@ func (s Sphere) Hit(ray *Ray, rayT Interval) (bool, *HitRecord) {
 	c := oc.LengthSquared() - s.Radius*s.Radius
 
 	discriminant := h*h - a*c
-
 	if discriminant < 0 {
 		return false, nil
 	}
@@ -34,7 +33,6 @@ func (s Sphere) Hit(ray *Ray, rayT Interval) (bool, *HitRecord) {
 
 	// Find the nearest root that lies in the acceptable range.
 	root := (h - sqrtd) / a
-	//if root <= rayT.Min || rayT.Max <= root {
 	if !rayT.Surrounds(root) {
 		root = (h + sqrtd) / a
 		if !rayT.Surrounds(root) {
